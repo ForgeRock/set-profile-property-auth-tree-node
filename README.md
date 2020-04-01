@@ -19,14 +19,20 @@ A simple authentication node for ForgeRock's [Identity Platform][forgerock_platf
 
 ## Installation
 
+Download the jar from the releases tab on github [here](https://github.com/ForgeRock/set-profile-property-auth-tree-node/releases/latest).
+
 Copy the .jar file from the ../target directory into the ../web-container/webapps/openam/WEB-INF/lib directory where AM is deployed.  Restart the web container to pick up the new node.  The node will then appear in the authentication trees components palette.
 
 ## Usage
 
-Deploy the node and set appropriate key/value pairs where  
+### Set Profile Property Configuration
+* **Properties** - The user profile attributes to set. `Key` = `profile attribute name`, `Value` = `Shared State Object
+ Name` or "literal".
+* **Transient Properties** -  The user profile attributes to set. `Key` = `profile attribute name`, `Value` = `Shared
+ State Object Name` or "literal". If the value is not literal, then transient state is used to lookup the values.
+* **Add Attributes** - When enabled, the new attribute values will be added to the existing attribute values instead of replacing them.
 
-**key**: name of the users profile attribute (e.g., givenName, sn, employeeNumber)  
-**value**: name of an authentication shared state value (e.g., authLevel) or a literal string in quotes (e.g., "Jones")  
+**Note** - This node can handle both `String` and `List<String>` values stored in Access Management sharedState.
 
 ## To Build
 

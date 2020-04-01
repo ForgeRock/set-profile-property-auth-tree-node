@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2019 ForgeRock AS.
+ * Copyright 2019-2020 ForgeRock AS.
  */
 package org.forgerock.openam.auth.nodes;
 
@@ -23,8 +23,13 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openam.auth.node.api.SharedStateConstants.REALM;
 import static org.forgerock.openam.auth.node.api.SharedStateConstants.USERNAME;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
 import org.forgerock.openam.auth.node.api.TreeContext;
@@ -36,6 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.sun.identity.common.CaseInsensitiveHashMap;
 import com.sun.identity.idm.AMIdentity;
 
 public class SetProfilePropertyNodeTest {
@@ -79,6 +85,32 @@ public class SetProfilePropertyNodeTest {
     }
 
     @Test
+    public void shouldAddValues() throws Exception {
+        given(config.properties()).willReturn(ImmutableMap.of("hello", "\"world\""));
+        given(config.addAttributes()).willReturn(true);
+        given(coreWrapper.getIdentity(USER, REALM_NAME)).willReturn(identity);
+        given(identity.getAttributes(any())).willReturn(new CaseInsensitiveHashMap<String, Set<String>>() {{
+            put("hello", singleton("bar"));
+        }});
+        node.process(setupTreeContext());
+
+        verify(identity).setAttributes(singletonMap("hello", new HashSet<>(Arrays.asList("world", "bar"))));
+        verify(identity).store();
+    }
+
+    @Test
+    public void shouldAddMultiValues() throws Exception {
+        given(config.properties()).willReturn(ImmutableMap.of("hello", "world"));
+        given(coreWrapper.getIdentity(USER, REALM_NAME)).willReturn(identity);
+        TreeContext context = setupTreeContext();
+        context.sharedState.put("world", Arrays.asList("foo", "bar"));
+        node.process(context);
+
+        verify(identity).setAttributes(singletonMap("hello", new HashSet<>(Arrays.asList("foo", "bar"))));
+        verify(identity).store();
+    }
+
+    @Test
     public void shouldSaveTransientProperties() throws Exception {
         given(config.transientProperties()).willReturn(ImmutableMap.of("badger", "transient"));
         given(coreWrapper.getIdentity(USER, REALM_NAME)).willReturn(identity);
@@ -91,6 +123,7 @@ public class SetProfilePropertyNodeTest {
 
     private TreeContext setupTreeContext() {
         return new TreeContext(json(object(field(USERNAME, USER), field(REALM, REALM_NAME))),
-                json(object(field("transient", "content"))), new ExternalRequestContext.Builder().build(), emptyList());
+                               json(object(field("transient", "content"))),
+                               new ExternalRequestContext.Builder().build(), emptyList());
     }
 }
