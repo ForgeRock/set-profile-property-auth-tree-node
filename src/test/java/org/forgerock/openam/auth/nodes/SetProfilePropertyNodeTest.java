@@ -124,6 +124,6 @@ public class SetProfilePropertyNodeTest {
     private TreeContext setupTreeContext() {
         return new TreeContext(json(object(field(USERNAME, USER), field(REALM, REALM_NAME))),
                                json(object(field("transient", "content"))),
-                               new ExternalRequestContext.Builder().build(), emptyList());
+                               new ExternalRequestContext.Builder().build(), emptyList(), null);
     }
 }
