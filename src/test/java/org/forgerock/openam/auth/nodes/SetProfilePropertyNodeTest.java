@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
@@ -124,6 +125,6 @@ public class SetProfilePropertyNodeTest {
     private TreeContext setupTreeContext() {
         return new TreeContext(json(object(field(USERNAME, USER), field(REALM, REALM_NAME))),
                                json(object(field("transient", "content"))),
-                               new ExternalRequestContext.Builder().build(), emptyList());
+                               new ExternalRequestContext.Builder().build(), emptyList(), Optional.empty());
     }
 }
